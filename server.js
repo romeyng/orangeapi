@@ -6,8 +6,8 @@ var router = express.Router();
 
 var dbConfig = {
     host: "localhost",
-    user: "serverjs",
-    password: "",
+    user: "camfuelapp",
+    password: "password",
     database: "swiftpac_agents"
     
     
@@ -37,7 +37,7 @@ var server = app.listen(process.env.PORT || 8080, function (){
 
 
 app.get('/', (req,res)=>{
-    q="select * from fuel";
+    q="select * from fuel_tickets";
     connection.query(q,function(error, results,fields){
         if (error){
             return res.send("error");
