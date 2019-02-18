@@ -49,20 +49,24 @@ app.get('/', (req,res)=>{
     
 });
 
-app.post('/administrative', function(req, res){
+app.post('/createcustomer', function(req, res){
+    console.log(req);
     name = req.body.customerName;
     fuelCompany = req.body.fuelCompany;
     accountType = req.body.accountType;
-    q= "insert into customers (customer_name,fuel_company,account_type) values ?";
-    values=[[name],[fuelCompany],[accountType]];
+    
+    q= `insert into customers (customer_name, fuel_company, account_type) values (?,?,?)`;
+    let values=[name,fuelCompany,accountType];
     connection.query(q,values,function (error,results,fields) { 
         if (error){
+            console.log("q fail"+values+" error: "+error)
             return res.send(error);
         } else {
-            
+            console.log('query success'+values)
             return res.send(results);
         }
      })
+
     
     
 });
