@@ -40,11 +40,30 @@ app.get('/', (req,res)=>{
     q="select * from fuel_tickets";
     connection.query(q,function(error, results,fields){
         if (error){
-            return res.send("error");
+            return res.send(error);
         } else {
+            
             return res.send(results);
         }
     });
+    
+});
+
+app.post('/administrative', function(req, res){
+    name = req.body.customerName;
+    fuelCompany = req.body.fuelCompany;
+    accountType = req.body.accountType;
+    q= "insert into customers (customer_name,fuel_company,account_type) values ?";
+    values=[[name],[fuelCompany],[accountType]];
+    connection.query(q,values,function (error,results,fields) { 
+        if (error){
+            return res.send(error);
+        } else {
+            
+            return res.send(results);
+        }
+     })
+    
     
 });
 
