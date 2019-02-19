@@ -52,7 +52,7 @@ app.get('/', (req,res)=>{
 app.post('/createcustomer', function(req, res){
     console.log(req);
     name = req.body.customerName;
-    company = req.body.companyName;
+    company = req.body.company;
     accountType = req.body.accountType;
     
     q= `insert into customers (customer_name, company_name, account_type) values (?,?,?)`;
