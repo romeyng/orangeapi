@@ -12,10 +12,11 @@ var dbConfig = {
     
     
 };
-
+var jsonParser=bodyParser.json()
+var urlencodedParser = bodyParser.urlencoded({extended:false})
 var connection = sql.createConnection(dbConfig);
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({extended:true}));
+// app.use(bodyParser.json());
 
 
 
@@ -49,14 +50,15 @@ app.get('/', (req,res)=>{
     
 });
 
-app.post('/createcustomer', function(req, res){
+app.post('/createcustomer', jsonParser, function(req, res){
     console.log(req);
     name = req.body.customerName;
     company = req.body.company;
     accountType = req.body.accountType;
+    email = req.body.accountType;
     
-    q= `insert into customers (customer_name, company_name, account_type) values (?,?,?)`;
-    let values=[name,company,accountType];
+    q= `insert into customers (customer_name, company_name, account_type) values (?,?,?,?)`;
+    let values=[name,company,accountType,email];
     connection.query(q,values,function (error,results,fields) { 
         if (error){
             console.log("q fail"+values+" error: "+error)
