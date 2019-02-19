@@ -57,7 +57,7 @@ app.post('/createcustomer', jsonParser, function(req, res){
     accountType = req.body.accountType;
     email = req.body.accountType;
     
-    q= `insert into customers (customer_name, company_name, account_type) values (?,?,?,?)`;
+    q= `insert into customers (customer_name, company_name, account_type, email) values (?,?,?,?)`;
     let values=[name,company,accountType,email];
     connection.query(q,values,function (error,results,fields) { 
         if (error){
