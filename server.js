@@ -52,11 +52,11 @@ app.get('/', (req,res)=>{
 app.post('/createcustomer', function(req, res){
     console.log(req);
     name = req.body.customerName;
-    fuelCompany = req.body.fuelCompany;
+    company = req.body.companyName;
     accountType = req.body.accountType;
     
-    q= `insert into customers (customer_name, fuel_company, account_type) values (?,?,?)`;
-    let values=[name,fuelCompany,accountType];
+    q= `insert into customers (customer_name, company_name, account_type) values (?,?,?)`;
+    let values=[name,company,accountType];
     connection.query(q,values,function (error,results,fields) { 
         if (error){
             console.log("q fail"+values+" error: "+error)
