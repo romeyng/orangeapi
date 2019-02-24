@@ -58,6 +58,7 @@ app.post('/createcustomer', jsonParser, function(req, res){
     email = req.body.accountType;
     
     q= `insert into customers (customer_name, company_name, account_type, email) values (?,?,?,?)`;
+    
     let values=[name,company,accountType,email];
     connection.query(q,values,function (error,results,fields) { 
         if (error){
@@ -68,10 +69,65 @@ app.post('/createcustomer', jsonParser, function(req, res){
             return res.send(results);
         }
      })
+    });
+
+app.post('/createlocation', jsonParser, function(req, res){
+    console.log(req);
+    name = req.body.locationName;
+    airportCode = req.body.airportCode;
+    
+    
+    q= `insert into fbo_locations (location_name, airport_code) values (?,?)`;
+    
+    let values=[name,airportCode];
+    connection.query(q,values,function (error,results,fields) { 
+        if (error){
+            console.log("q fail"+values+" error: "+error)
+            return res.send(error);
+        } else {
+            console.log('query success'+values)
+            return res.send(results);
+        }
+     })
+    });
+
+app.get('/getcustomers', jsonParser, function(req,res){
+    console.log(req.body);
+    //TODO: insert csutomer as well.
+    let values = Object.values(req.body);
+    console.log(values);
+    q=`select customer_name from customers`;
+    connection.query(q,values,function (error,results,fields) { 
+        if (error){
+            console.log("q fail"+values+" error: "+error);
+            return res.send(error);
+        } else {
+            console.log('query success'+values);
+            return res.send(results);
+        }
+    })
+});
+
+app.get('/getfuelrecon', jsonParser, function(req,res){
+    console.log(req.body);
+    //TODO: insert csutomer as well.
+    let values = Object.values(req.body);
+    console.log(values);
+    q=`SELECT fu.date_updated,ft.tail_no, fbo.airport_code, fu.fuelrequestID, fu.added, fu.uplifted, customers.customerID, customers.customer_name, customers.company_name FROM fuel_recon fu, customers, fuel_tickets ft,fbo_locations fbo where fu.fuelrequestID=ft.fuelrequestID and customers.customerID=ft.customerID and fbo.locationID=ft.locationID`;
+    connection.query(q,values,function (error,results,fields) { 
+        if (error){
+            console.log("q fail"+values+" error: "+error);
+            return res.send(error);
+        } else {
+            console.log('query success'+values);
+            return res.send(results);
+        }
+    })
+});
 
     
     
-});
+
 
 
 
