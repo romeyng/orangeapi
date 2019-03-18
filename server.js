@@ -52,17 +52,27 @@ app.get('/', (req,res)=>{
     
 });
 
-app.post('/createcustomer', jsonParser, function(req, res){
+app.post('/createcustomer', jsonParser, async function(req, res){
     console.log("new customerrequest");
     console.log(req.body);
     name = req.body.customerName;
-    company = req.body.company;
+    companyID = req.body.companyID;
     accountType = req.body.accountType;
-    email = req.body.accountType;
+    email = req.body.email;
+    companystat = req.body.companystat;
+
+    if (companystat=='new'){
+    	try{
+    	createcompany=`insert into companies (company_name, account_type) values (?,?)`;
+    	createCompanyResult= await qry(createcompany,[companyID,accountType])
+    }catch{
+    	console.log("could not insert into companies");
+    }
+    }
+    q= `insert into customers (customer_name, email,companyID) values (?,?,?);`; 
     
-    q= `insert into customers (customer_name, company_name, account_type, email) values (?,?,?,?)`;
+    let values=[name,email,createCompanyResult.insertId];
     
-    let values=[name,company,accountType,email];
     connection.query(q,values,function (error,results,fields) { 
         if (error){
             console.log("q fail"+values+" error= "+error)
@@ -98,7 +108,7 @@ app.post('/getcustomers', jsonParser, function(req,res){
     console.log(req.body.type);
     
     let values = Object.values(req.body);
-    q=`select customerID, customer_name, account_type from customers`;
+    q=`select * from customers, companies where customers.companyID=companies.companyID`;
     console.log(values);
     if (req.body.type == "prepaid"){
     	q+= `where account_type='prepaid'` 
@@ -149,6 +159,22 @@ app.get('/getlocations', jsonParser, function(req,res){
         }
     })
 });
+app.get('/getcompanies', jsonParser, function(req,res){
+    console.log(req.body);
+    
+    
+    
+    q=`select * from companies`;
+    connection.query(q,function (error,results,fields) { 
+        if (error){
+            console.log("q fail error= "+error);
+            return res.send(error);
+        } else {
+            console.log('query success'+results);
+            return res.send(results);
+        }
+    })
+});
 
 app.get('/getrates', jsonParser, function(req,res){
     console.log(req.body);
@@ -181,6 +207,7 @@ app.post('/addrate', jsonParser, function(req, res){
       customerID= req.body.customerID,
       locationID= req.body.locationID,
       fuelType= req.body.fuelType,
+      companyID= req.body.companyID
 
       final = 0;
     if (markupType == "pct") {
@@ -210,9 +237,10 @@ rate_name,
 locationID,
 fuelID,
 customerID,
-final_rate) values (?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+final_rate, 
+companyID) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
     
-    let values=[baseRate,markupType,fixed,pct,tax,multiplier,unitDesc,rateDesc,rateName,locationID,fuelType,customerID,final];
+    let values=[baseRate,markupType,fixed,pct,tax,multiplier,unitDesc,rateDesc,rateName,locationID,fuelType,customerID,final,companyID];
     connection.query(q,values,function (error,results,fields) { 
         if (error){
             console.log("q fail"+values+" error= "+error)
@@ -262,7 +290,8 @@ app.post('/createuplift', jsonParser,  async function(req, res){
     meterBefore = req.body.meterBefore;
     meterAfter = req.body.meterAfter;
     
-    paystatus = req.body.paymentStatus
+    paystatus = req.body.paymentStatus;
+    rateID=req.body.rateID;
 
     let meter_diff= meterBefore-meterAfter;
     if (req.body.ticketStatus==true){
@@ -298,7 +327,7 @@ app.post('/createuplift', jsonParser,  async function(req, res){
 status) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
     
     let values=[fuelType,fuelLocation,userID,customerID,tailNo,arrival,required,origin,destination,mtow,requestQuantity,pilot,supervisor,paymentMethod,meterBefore,meterAfter,meter_diff,ticketStatus];
- reconQuery=`insert into fuel_recon (fuelID,locationID,date_submitted, uplifted, fuelrequestID) VALUES (?,?,?,?,?)`;
+ reconQuery=`insert into fuel_recon (fuelID,locationID,date_submitted, uplifted, fuelrequestID,rateID) VALUES (?,?,?,?,?,?)`;
       
 	
 
@@ -313,7 +342,7 @@ status) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 	}catch(err){
 		console.log("error= "+err);
 	}
-	let reconVals = [fuelType, fuelLocation,required, meter_diff, createdTicket];
+	let reconVals = [fuelType, fuelLocation,required, meter_diff, createdTicket,rateID];
 	console.log("createdTicket"+createdTicket);
     connection.query(reconQuery,reconVals,function (error,results,fields){
 		    		if (error){
@@ -356,6 +385,26 @@ app.post('/createsupply', jsonParser, function(req, res){
             return res.send(results);
         }
      })
+    });
+
+    app.post('/getcurrentrates', jsonParser, function(req,res){
+        console.log("current rates called");
+        customerID= req.body.customerID;
+        location= req.body.fuelLocation;
+        fuelType = req.body.fuelType;
+    
+    
+        let params=[customerID,location,fuelType]; 
+        q=`SELECT * FROM current_monthly_rates where customerID=(?) and locationID= (?) and fuelID= (?) `;
+        connection.query(q,params,function (error,results,fields) { 
+            if (error){
+                console.log("q fail"+params+" error= "+error);
+                return res.send(error);
+            } else {
+                console.log('query success'+params);
+                return res.send(results);
+            }
+        })
     });
 
 
